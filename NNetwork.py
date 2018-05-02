@@ -42,6 +42,8 @@ class NeuralNetwork(object):
 
 	def feedforward(self, input_array):
 
+		self.h_outputs = []
+
 		# Generate the hidden outputs
 		inputs = Matrix.inputFromArray(input_array)
 		hidden = self.ih_weights.matrixProduct(inputs)
