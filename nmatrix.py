@@ -1,5 +1,6 @@
 #!/usr/bin/python
 from random import SystemRandom, uniform
+import sys
 
 class Matrix(object):
 
@@ -45,6 +46,11 @@ class Matrix(object):
 		if(not isinstance(n, Matrix)):
 			print("matrixProduct: param is not a matrix object")
 			raise TypeError
+
+		if(self.cols != n.rows):
+			print("Cannot perform matrix product")
+			print("self.rows: %d\tn.rows: %d\nself.cols: %d\tn.cols: %d" % (self.rows, n.rows, self.cols, n.cols))
+			raise Exception
 
 		result = Matrix(self.rows, n.cols)
 

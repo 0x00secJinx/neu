@@ -2,17 +2,11 @@
 from nmatrix import Matrix
 from activation import sigmoid, dsigmoid
 import sys
-import pdb
-
-"""
-TO DO:
-
-	Have a matrix to store each hidden answer so backpropogation can work
-"""
 
 class NeuralNetwork(object):
 
-	def __init__(self, input_nodes, hidden_layers , hidden_nodes, output_nodes):
+	def __init__(self, input_nodes, hidden_layers, hidden_nodes, output_nodes):
+
 		self.i_nodes = input_nodes
 		self.h_layers = hidden_layers
 		self.h_nodes_count = hidden_nodes
@@ -33,12 +27,10 @@ class NeuralNetwork(object):
 		self.ho_weights = Matrix(self.o_nodes, self.h_nodes_count[self.h_layers-1])
 
 		for i in range(self.h_layers):
-			#print(self.h_nodes_count[i])
 			self.h_bias.append(Matrix(self.h_nodes_count[i], 1))
 		for i in range(self.h_layers-1):
 			self.h_weights[i].randomize()
-			#self.h_weights[i].printMatrix()
-			#print("")
+
 		self.ih_weights.randomize()
 		self.ho_weights.randomize()
 		for i in self.h_bias:
@@ -58,9 +50,10 @@ class NeuralNetwork(object):
 		self.h_outputs.append(hidden)
 
 		for i in range(len(self.h_weights)):
-			self.h_outputs.append(self.h_weights[i].matrixProduct(self.h_outputs[i]))
-			self.h_outputs[i+1].matrixAdd(self.h_bias[i+1])
-			self.h_outputs[i+1].map(sigmoid)
+			tmp = self.h_weights[i].matrixProduct(self.h_outputs[i])
+			tmp.matrixAdd(self.h_bias[i+1])
+			tmp.map(sigmoid)
+			self.h_outputs.append(tmp)
 
 		output = self.ho_weights.matrixProduct(self.h_outputs[len(self.h_outputs)-1])
 		output.matrixAdd(self.o_bias)
@@ -74,8 +67,6 @@ class NeuralNetwork(object):
 
 		self.h_outputs = []
 
-		#pdb.set_trace()
-
 		inputs = Matrix.inputFromArray(input_array)
 		hidden = self.ih_weights.matrixProduct(inputs)
 		hidden.matrixAdd(self.h_bias[0])
@@ -83,51 +74,49 @@ class NeuralNetwork(object):
 		self.h_outputs.append(hidden)
 
 		for i in range(len(self.h_weights)):
-			self.h_outputs.append(self.h_weights[i].matrixProduct(self.h_outputs[i]))
-			self.h_outputs[i+1].matrixAdd(self.h_bias[i+1])
-			self.h_outputs[i+1].map(sigmoid)
+			tmp = self.h_weights[i].matrixProduct(self.h_outputs[i])
+			tmp.matrixAdd(self.h_bias[i+1])
+			tmp.map(sigmoid)
+			self.h_outputs.append(tmp)
 
 		output = self.ho_weights.matrixProduct(self.h_outputs[len(self.h_outputs)-1])
 		output.matrixAdd(self.o_bias)
 		output.map(sigmoid)
-		#output.printMatrix()
 
-		################################
-		# Last hidden to output
-		################################
-		# Calculate the output errors
 		targets = Matrix.targetsFromArray(target_array)
 		output_errors = Matrix.matrixSubtract(targets, output)
-		# Gradients for output to hidden
 		gradients = Matrix.staticMap(output, dsigmoid)
 		gradients.matrixMultiply(output_errors)
 		gradients.multiply(self.learning_rate)
-		# Get the output of the last hidden layer and transpose
 		hidden_output_T = self.h_outputs[len(self.h_outputs)-1].transposeMatrix()
 		deltas = gradients.matrixProduct(hidden_output_T)
 		self.ho_weights.matrixAdd(deltas)
 		self.o_bias.matrixAdd(gradients)
 
-		################################
-		# Hidden Layers
-		################################
 		for i in range(self.h_layers-1):
-			#pdb.set_trace()
-			if(i == self.h_layers-1):
-				break
-			print("Here")
 			if(i == 0):
 				hw_t = self.ho_weights.transposeMatrix()
+				hidden_errors = hw_t.matrixProduct(output_errors)
 			else:
-				hw_t = self.h_weights[i-len(self.h_weights)-1]
-			hidden_errors = hw_t.matrixProduct(output_errors)
-			hidden_gradient = Matrix.staticMap(self.h_outputs[i-len(self.h_outputs)+1], dsigmoid)
+				hw_t = self.h_weights[len(self.h_weights)-i].transposeMatrix()
+				hidden_errors = hw_t.matrixProduct(hidden_errors)
+			hidden_gradient = Matrix.staticMap(self.h_outputs[len(self.h_outputs)-i-1], dsigmoid)
 			hidden_gradient.matrixMultiply(hidden_errors)
 			hidden_gradient.multiply(self.learning_rate)
+			hidden_T = self.h_outputs[len(self.h_outputs)-i-2].transposeMatrix()
+			weight_h_deltas = hidden_gradient.matrixProduct(hidden_T)
+			self.h_weights[len(self.h_weights)-i-1].matrixAdd(weight_h_deltas)
+			self.h_bias[len(self.h_bias)-i-1].matrixAdd(hidden_gradient)
 
-		sys.exit()
-
-
+		hw_t = self.h_weights[0].transposeMatrix()
+		hidden_errors = hw_t.matrixProduct(hidden_errors)
+		hidden_gradient = Matrix.staticMap(self.h_outputs[0], dsigmoid)
+		hidden_gradient.matrixMultiply(hidden_errors)
+		hidden_gradient.multiply(self.learning_rate)
+		inputs_T = inputs.transposeMatrix()
+		weight_ih_deltas = hidden_gradient.matrixProduct(inputs_T)
+		self.ih_weights.matrixAdd(weight_ih_deltas)
+		self.h_bias[0].matrixAdd(hidden_gradient)
 
 
 	def predict(self, input_array):

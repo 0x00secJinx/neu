@@ -2,6 +2,7 @@
 from nmatrix import Matrix
 from activation import sigmoid, dsigmoid
 import sys
+import pdb
 
 """
 TO DO:
@@ -35,16 +36,18 @@ class NeuralNetwork(object):
         hidden.matrixAdd(self.h_bias)
         # activation function
         hidden.map(sigmoid)
+        #hidden.printMatrix()
 
         output = self.ho_weights.matrixProduct(hidden)
         output.matrixAdd(self.o_bias)
         output.map(sigmoid)
-        #output.printMatrix()
-
+#        output.printMatrix()
+        #sys.exit()
         return output.matrixToArray()
 
     def train(self, input_array, target_array):
 
+        pdb.set_trace()
         #send to the first hidden layer
         inputs = Matrix.inputFromArray(input_array)
         hidden = self.ih_weights.matrixProduct(inputs)
@@ -75,6 +78,7 @@ class NeuralNetwork(object):
         # Transpose the weights between the nodes of the layer
         #   the program is working with and the previous changed
         #   weights
+        pdb.set_trace()
         who_t = self.ho_weights.transposeMatrix()
 
         # Find the product of the transposed matrix and the errors

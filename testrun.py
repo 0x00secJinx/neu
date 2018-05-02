@@ -1,5 +1,6 @@
 #!/usr/bin/python
-from NNetwork import NeuralNetwork
+#from NNetwork import NeuralNetwork
+from fixednn import NeuralNetwork
 import random
 
 
@@ -32,7 +33,8 @@ def main():
 		'output': [0]
 	}]
 
-	nn = NeuralNetwork(2, 3, [8, 10, 7], 1)
+#	nn = NeuralNetwork(2, 1, [3], 1)
+	nn = NeuralNetwork(2, 5, 1)
 	print("Before Training:")
 	print("\t[1,1]: Output should be close to 0")
 	print("\t\t" + str(nn.predict([1,1])))
@@ -45,7 +47,7 @@ def main():
 
 	secure_random = random.SystemRandom()
 
-	for _ in range(25000):
+	for _ in range(10000):
 		data = secure_random.choice(training_data)
 		nn.train(data['inputs'], data['output'])
 
