@@ -31,9 +31,45 @@ static PyObject *activation_dsigmoid(PyObject *self, PyObject *args) {
 	return Py_BuildValue("f", result);
 }
 
+static PyObject* activation_relu(PyObject *self, PyObject *args) {
+	float y;
+	float result;
+	if(!PyArg_ParseTuple(args,"f", &y)){
+		printf("relu requires a float!\n");
+		Py_INCREF(Py_None);
+		return Py_None;
+	}
+	// Basically a max function
+	if (y > 0) {
+		result = y;
+	} else {
+		result = 0.0;	
+	}
+	return Py_BuildValue("f", result);
+}
+
+static PyObject *activation_drelu(PyObject *self, PyObject *args) {
+	float y;
+	float result;
+	if(!PyArg_ParseTuple(args,"f", &y)){
+		printf("drelu requires a float!\n");
+		Py_INCREF(Py_None);
+		return Py_None;
+	}
+	if (y > 0) {
+		result = 1.0;
+	} else {
+		result = 0.0;
+	}
+	return Py_BuildValue("f", result);
+	
+}
+
 static PyMethodDef module_methods[] = {
 	{"sigmoid",  (PyCFunction)activation_sigmoid,  METH_VARARGS, NULL},
 	{"dsigmoid", (PyCFunction)activation_dsigmoid, METH_VARARGS, NULL},
+	{"relu",     (PyCFunction)activation_relu,     METH_VARARGS, NULL},
+	{"drelu",    (PyCFunction)activation_drelu,    METH_VARARGS, NULL},
 	{NULL}
 };
 
