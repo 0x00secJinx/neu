@@ -1,16 +1,19 @@
 #!/usr/bin/python
 from mnist import MNIST
-from NNetwork import NeuralNetwork
+from fixednn import NeuralNetwork
 from random import randrange, SystemRandom
 from time import sleep
 import sys
+from datetime import datetime
 
 mndata = MNIST("./")
 images, label = mndata.load_training()
+test_img, test_label = mndata.load_testing()
+
 
 def createLabelArray(expected):
 	arr = []
-	for i in range(0,10):
+	for i in range(10):
 		if(i != expected):
 			arr.append(0.0)
 		elif(i == expected):
@@ -19,33 +22,42 @@ def createLabelArray(expected):
 
 
 def getPrediction(arr):
-	highest = arr[0]
-	highest_i = 0
-	for i in range(len(arr)):
-		if arr[i] > highest:
-			highest = arr[i]
-			highest_i = i
+	highest = 0
+	print(arr)
+	for i in range(1, len(arr)):
+		if arr[i] > arr[highest]:
+			highest = i
 
-	return highest_i
+	return highest
 
 
-nn = NeuralNetwork(784, 250, 10)
-secure_random = SystemRandom()
-for i in range(0,1000):
+nn = NeuralNetwork(784, 100, 10)
+
+print("Training...")
+a = datetime.now()
+#for i in range(2500):
+for i in range(len(images)):
 	sys.stdout.write(str(i) + '\r')
 	sys.stdout.flush()
-	index = secure_random.randrange(0,len(images))
-	label_arr = createLabelArray(label[index])
+	label_arr = createLabelArray(label[i])
 	image_arr = []
-	for i in range(len(images[index])):
-		image_arr.append(double(images[index][i]/256.0))
+	for j in range(len(images[i])):
+		image_arr.append(float(images[i][j]/255.0))
 	nn.train(image_arr, label_arr)
 
+b = datetime.now()
+
+
 number_correct = 0.0
-for i in range(200):
-	index = secure_random.randrange(0, len(images))
-	predicted = nn.predict(images[index])
-	print("The expected output is %d\nPrediction: %d\n" % (label[index],getPrediction(predicted)))
-	if (label[index] == getPrediction(predicted)):
+for i in range(len(test_img)):
+	img_arr = []
+	for j in range(len(test_img[i])):
+		img_arr.append(float(images[i][j]/255.0))
+	predicted = nn.predict(img_arr)
+	prediction = getPrediction(predicted)
+	print("The expected output is %d\nPrediction: %d\n" % (test_label[i],prediction))
+	if (test_label[i] == prediction):
 		number_correct += 1
-print("Percent Correct: %.2f" % (number_correct/200))
+print("Percent Correct: %.2f" % (number_correct/len(test_img)))
+
+print("Time to train: " + str(b-a))

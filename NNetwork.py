@@ -1,11 +1,12 @@
 #!/usr/bin/python
 from nmatrix import Matrix
-from activation import sigmoid, dsigmoid
+#from activation import sigmoid, dsigmoid, relu, drelu
+from act import sigmoid, sigmoid, tanh, dtanh
 import sys
 
 class NeuralNetwork(object):
 
-	def __init__(self, input_nodes, hidden_layers, hidden_nodes, output_nodes):
+	def __init__(self, input_nodes, hidden_layers, hidden_nodes, output_nodes, learning_rate):
 
 		self.i_nodes = input_nodes
 		self.h_layers = hidden_layers
@@ -13,7 +14,6 @@ class NeuralNetwork(object):
 		self.h_outputs = []
 		self.h_weights = []
 		self.h_bias = []
-		self.h_errors = []
 		self.o_nodes = output_nodes
 
 		if(len(self.h_nodes_count) != self.h_layers):
@@ -38,7 +38,7 @@ class NeuralNetwork(object):
 
 		self.o_bias = Matrix(self.o_nodes, 1)
 		self.o_bias.randomize()
-		self.learning_rate = 0.1
+		self.learning_rate = learning_rate
 
 	def feedforward(self, input_array):
 
@@ -48,18 +48,18 @@ class NeuralNetwork(object):
 		inputs = Matrix.inputFromArray(input_array)
 		hidden = self.ih_weights.matrixProduct(inputs)
 		hidden.matrixAdd(self.h_bias[0])
-		hidden.map(sigmoid)
+		hidden.map(relu)
 		self.h_outputs.append(hidden)
 
 		for i in range(len(self.h_weights)):
 			tmp = self.h_weights[i].matrixProduct(self.h_outputs[i])
 			tmp.matrixAdd(self.h_bias[i+1])
-			tmp.map(sigmoid)
+			tmp.map(relu)
 			self.h_outputs.append(tmp)
 
 		output = self.ho_weights.matrixProduct(self.h_outputs[len(self.h_outputs)-1])
 		output.matrixAdd(self.o_bias)
-		output.map(sigmoid)
+		output.map(relu)
 
 		self.h_outputs = []
 
@@ -72,22 +72,22 @@ class NeuralNetwork(object):
 		inputs = Matrix.inputFromArray(input_array)
 		hidden = self.ih_weights.matrixProduct(inputs)
 		hidden.matrixAdd(self.h_bias[0])
-		hidden.map(sigmoid)
+		hidden.map(relu)
 		self.h_outputs.append(hidden)
 
 		for i in range(len(self.h_weights)):
 			tmp = self.h_weights[i].matrixProduct(self.h_outputs[i])
 			tmp.matrixAdd(self.h_bias[i+1])
-			tmp.map(sigmoid)
+			tmp.map(relu)
 			self.h_outputs.append(tmp)
 
 		output = self.ho_weights.matrixProduct(self.h_outputs[len(self.h_outputs)-1])
 		output.matrixAdd(self.o_bias)
-		output.map(sigmoid)
+		output.map(relu)
 
 		targets = Matrix.targetsFromArray(target_array)
 		output_errors = Matrix.matrixSubtract(targets, output)
-		gradients = Matrix.staticMap(output, dsigmoid)
+		gradients = Matrix.staticMap(output, drelu)
 		gradients.matrixMultiply(output_errors)
 		gradients.multiply(self.learning_rate)
 		hidden_output_T = self.h_outputs[len(self.h_outputs)-1].transposeMatrix()
@@ -102,7 +102,7 @@ class NeuralNetwork(object):
 			else:
 				hw_t = self.h_weights[len(self.h_weights)-i].transposeMatrix()
 				hidden_errors = hw_t.matrixProduct(hidden_errors)
-			hidden_gradient = Matrix.staticMap(self.h_outputs[len(self.h_outputs)-i-1], dsigmoid)
+			hidden_gradient = Matrix.staticMap(self.h_outputs[len(self.h_outputs)-i-1], drelu)
 			hidden_gradient.matrixMultiply(hidden_errors)
 			hidden_gradient.multiply(self.learning_rate)
 			hidden_T = self.h_outputs[len(self.h_outputs)-i-2].transposeMatrix()
@@ -110,9 +110,13 @@ class NeuralNetwork(object):
 			self.h_weights[len(self.h_weights)-i-1].matrixAdd(weight_h_deltas)
 			self.h_bias[len(self.h_bias)-i-1].matrixAdd(hidden_gradient)
 
-		hw_t = self.h_weights[0].transposeMatrix()
-		hidden_errors = hw_t.matrixProduct(hidden_errors)
-		hidden_gradient = Matrix.staticMap(self.h_outputs[0], dsigmoid)
+		if(self.h_layers == 1):
+			hw_t = self.ho_weights.transposeMatrix()
+			hidden_errors = hw_t.matrixProduct(output_errors)
+		else:
+			hw_t = self.h_weights[0].transposeMatrix()
+			hidden_errors = hw_t.matrixProduct(hidden_errors)
+		hidden_gradient = Matrix.staticMap(self.h_outputs[0], drelu)
 		hidden_gradient.matrixMultiply(hidden_errors)
 		hidden_gradient.multiply(self.learning_rate)
 		inputs_T = inputs.transposeMatrix()

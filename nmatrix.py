@@ -166,3 +166,8 @@ class Matrix(object):
 				arr.append(self.matrix[i][j])
 
 		return arr
+
+	def fillMatrix(self, number):
+		for i in range(self.rows):
+			for j in range(self.cols):
+				self.matrix[i][j] = number

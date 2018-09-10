@@ -47,7 +47,7 @@ def main():
 
 	secure_random = random.SystemRandom()
 
-	for _ in range(10000):
+	for _ in range(20000):
 		data = secure_random.choice(training_data)
 		nn.train(data['inputs'], data['output'])
 
