@@ -28,11 +28,11 @@ class NeuralNetwork(object):
 		hidden = self.ih_weights.matrixProduct(inputs)
 		hidden.matrixAdd(self.h_bias)
 
-		hidden.map(tanh)
+		hidden.map(sigmoid)
 
 		output = self.ho_weights.matrixProduct(hidden)
 		output.matrixAdd(self.o_bias)
-		output.map(tanh)
+		output.map(sigmoid)
 
 		retarray = output.matrixToArray()
 		for x in retarray:
@@ -45,17 +45,17 @@ class NeuralNetwork(object):
 		hidden = self.ih_weights.matrixProduct(inputs)
 
 		hidden.matrixAdd(self.h_bias)
-		hidden.map(tanh)
+		hidden.map(sigmoid)
 
 		outputs = self.ho_weights.matrixProduct(hidden)
 		outputs.matrixAdd(self.o_bias)
-		outputs.map(tanh)
+		outputs.map(sigmoid)
 
 		targets = Matrix.targetsFromArray(target_array)
 
 		output_errors = Matrix.matrixSubtract(targets, outputs)
 
-		gradients = Matrix.staticMap(outputs, dtanh)
+		gradients = Matrix.staticMap(outputs, dsigmoid)
 		gradients.matrixMultiply(output_errors)
 		gradients.multiply(self.learning_rate)
 
@@ -68,7 +68,7 @@ class NeuralNetwork(object):
 		who_t = self.ho_weights.transposeMatrix()
 
 		hidden_errors = who_t.matrixProduct(output_errors)
-		hidden_gradient = Matrix.staticMap(hidden, dtanh)
+		hidden_gradient = Matrix.staticMap(hidden, dsigmoid)
 		hidden_gradient.matrixMultiply(hidden_errors)
 		hidden_gradient.multiply(self.learning_rate)
 
