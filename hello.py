@@ -31,12 +31,12 @@ def getPrediction(arr):
 	return highest
 
 
-nn = NeuralNetwork(784, 100, 10)
+nn = NeuralNetwork(784, 50, 10)
 
 print("Training...")
 a = datetime.now()
-#for i in range(2500):
-for i in range(len(images)):
+for i in range(2500):
+#for i in range(len(images)):
 	sys.stdout.write(str(i) + '\r')
 	sys.stdout.flush()
 	label_arr = createLabelArray(label[i])
@@ -50,10 +50,10 @@ b = datetime.now()
 
 number_correct = 0.0
 for i in range(len(test_img)):
-	img_arr = []
-	for j in range(len(test_img[i])):
-		img_arr.append(float(images[i][j]/255.0))
-	predicted = nn.predict(img_arr)
+#	img_arr = []
+#	for j in range(len(test_img[i])):
+#		img_arr.append(float(images[i][j]/255.0))
+	predicted = nn.predict(test_img[i])
 	prediction = getPrediction(predicted)
 	print("The expected output is %d\nPrediction: %d\n" % (test_label[i],prediction))
 	if (test_label[i] == prediction):
