@@ -63,40 +63,18 @@ class NeuralNetwork(object):
 
         output_errors = Matrix.matrixSubtract(targets, outputs)
 
-        gradients = Matrix.staticMap(outputs, dsigmoid)
-        gradients.matrixMultiply(output_errors)
-        gradients.multiply(self.learning_rate)
-
-        hidden_T = hidden.transposeMatrix()
-        weight_ho_deltas = gradients.matrixProduct(hidden_T)
-
-
-        self.ho_weights.matrixAdd(weight_ho_deltas)
-        self.o_bias.matrixAdd(gradients)
-
-        # Hidden layer weights start here
-        # Transpose the weights between the nodes of the layer
-        #   the program is working with and the previous changed
-        #   weights
-        pdb.set_trace()
-        who_t = self.ho_weights.transposeMatrix()
-
-        # Find the product of the transposed matrix and the errors
-        #   of the previous nodes
-        hidden_errors = who_t.matrixProduct(output_errors)
-
-        # Calculate the gradients for the hidden outputs
-        hidden_gradient = Matrix.staticMap(hidden, dsigmoid)
-        hidden_gradient.matrixMultiply(hidden_errors)
-        hidden_gradient.multiply(self.learning_rate)
-
-        # Get the gradients for the nodes in the layer
-        #   before and multiply them by the gradient
-        inputs_T = inputs.transposeMatrix()
-        weight_ih_deltas = hidden_gradient.matrixProduct(inputs_T)
-
-        self.ih_weights.matrixAdd(weight_ih_deltas)
-        self.h_bias.matrixAdd(hidden_gradient)
+        slope_output_layer = Matrix.staticMap(outputs, dsigmoid)
+        slope_hidden_layer = Matrix.staticMap(hidden, dsigmoid)
+        
+        delta_output = Matrix.matrixMultiply(output_errors, slope_output_layer)
+        hidden_errors = delta_output.matrixProduct(self.ho_weights.transpose())
+        
+        delta_hidden = Matrix.matrixMultiply(hidden_errors, slope_hidden_layer)
+        self.ho_weights = self.ho_weights.matrixAdd(hidden.Transpose().matrixProduct(delta_output))
+        self.ho_weights = self.ho_weights.multiply(self.learning_rate)
+        
+        self.ih_weights = self.ih_weights.matrixAdd(inputs.Transpose().matrixProduct(delta_hidden))
+        self.ih_weights = self.ih_weights.multiply(self.learning_rate)
 
     def predict(self, input_array):
         output = self.feedforward(input_array)
