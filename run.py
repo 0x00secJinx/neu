@@ -32,7 +32,7 @@ def main():
 		'output': [0]
 	}]
 
-	nn = NeuralNetwork(2, 10, 1)
+	nn = NeuralNetwork(2, 4, 1)
 	print("Before Training:")
 	print("\t[1,1]: Output should be close to 0")
 	print("\t\t" + str(nn.predict([1,1])))

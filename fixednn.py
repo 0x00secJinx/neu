@@ -18,10 +18,10 @@ class NeuralNetwork(object):
 
 		self.h_bias = Matrix(self.h_nodes, 1)
 		self.o_bias = Matrix(self.o_nodes, 1)
-		self.h_bias.fillMatrix(0.9)
-		self.o_bias.fillMatrix(0.9)
+		self.h_bias.randomize()
+		self.o_bias.randomize()
 
-		self.learning_rate = 0.09
+		self.learning_rate = 0.1
 
 	def feedforward(self, input_array):
 		inputs = Matrix.inputFromArray(input_array)
