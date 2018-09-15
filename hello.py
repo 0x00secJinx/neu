@@ -31,11 +31,11 @@ def getPrediction(arr):
 	return highest
 
 
-nn = NeuralNetwork(784, 50, 10)
+nn = NeuralNetwork(784, 100, 10)
 
 print("Training...")
 a = datetime.now()
-for i in range(2500):
+for i in range(20000):
 #for i in range(len(images)):
 	sys.stdout.write(str(i) + '\r')
 	sys.stdout.flush()
